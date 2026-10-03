@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Sound of the Story">
+<meta name="theme-color" content="#0d0b08">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+
+<title>The Sound of the Story</title>
+<style>
+@font-face{font-family:"Cinzel";src:url("assets/fonts/Cinzel.ttf") format("truetype");font-weight:400 900;}
+@font-face{font-family:"Garamond EB";src:url("assets/fonts/EBGaramond.ttf") format("truetype");font-weight:400 800;}
+@font-face{font-family:"Garamond EB";src:url("assets/fonts/EBGaramond-Italic.ttf") format("truetype");font-weight:400 800;font-style:italic;}
+:root{
+  --paper:#ece2c8; --paper2:#e2d5b4; --ink:#2a2118; --ink2:#5b4a36; --gold:#b08a3c; --goldL:#d8b968; --cream:#f4ecd9; --night:#16120d;
+  --shire:#b5cf7e; --fellowship:#bcd0e4; --seduction:#e2b84a; --lothlorien:#cfe6d6; --isengard:#e8763f; --neutral:#d8b968;
+  --shireD:#4d6a22; --fellowshipD:#2e5276; --seductionD:#8a6410; --lothlorienD:#3d6a55; --isengardD:#a03d12; --neutralD:#8a6a24;
+  --acc:var(--neutral); --accD:var(--neutralD);
+  --ease:cubic-bezier(.22,.7,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:#0d0b08;overflow:hidden;cursor:none}
+body.cursor{cursor:default}
+#viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0d0b08}
+#stage{position:relative;flex:none;width:1920px;height:1080px;overflow:hidden;background:var(--night);transform-origin:center center;
+  font-family:"Garamond EB",Georgia,serif;color:var(--cream);font-weight:450}
+.slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity 1.3s ease,visibility 0s linear 1.3s}
+.slide.active{opacity:1;visibility:visible;transition:opacity 1.3s ease,visibility 0s}
+/* backgrounds */
+.bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(.88) sepia(.14)}
+/* map slides in the same dark, warm tone as the film slides */
+.darkmap{--ink:#f1e7cf;--ink2:#d4c6a6;--accD:var(--goldL)}
+.darkmap .bg{filter:brightness(.4) sepia(.45) contrast(1.08)}
+.darkmap .sh-paper{background:radial-gradient(ellipse at center,rgba(14,11,7,0) 35%,rgba(14,11,7,.75) 100%)}
+.darkmap .card{--ink:#2a2118;--ink2:#5b4a36;--accD:#8a6a24}
+/* v2: opening film clip */
+.hookv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.6s ease;background:#000}
+.hookv.on{opacity:1}
+/* v2: phones */
+#fsbtn{position:fixed;right:calc(10px + env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));z-index:50;width:40px;height:40px;border-radius:50%;border:1px solid rgba(216,185,104,.5);background:rgba(13,11,8,.55);color:#d8b968;font-size:20px;line-height:38px;opacity:.55}
+#rotate{display:none}
+@media (orientation:portrait){body.touch #rotate{display:flex;position:fixed;inset:0;z-index:60;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0d0b08;color:#f4ecd9;font:500 22px/1.4 "Cinzel",Georgia,serif;letter-spacing:.06em;text-align:center;padding:0 24px;pointer-events:none}
+  body.touch #rotate span{font:italic 17px/1.4 "Garamond EB",Georgia,serif;color:#cfc4ab;letter-spacing:0}}
+.slide.active .bg.kb{animation:kb 40s linear forwards}
+@keyframes kb{from{transform:scale(1.0)}to{transform:scale(1.06)}}
+.shade{position:absolute;inset:0;pointer-events:none}
+.sh-left{background:linear-gradient(90deg,rgba(18,14,9,.88) 0%,rgba(18,14,9,.72) 38%,rgba(18,14,9,.12) 70%,rgba(18,14,9,0) 100%)}
+.sh-bottom{background:linear-gradient(180deg,rgba(18,14,9,.35) 0%,rgba(18,14,9,0) 25%,rgba(18,14,9,.25) 55%,rgba(18,14,9,.85) 100%)}
+.sh-soft{background:rgba(18,14,9,.38)}
+.sh-top{background:linear-gradient(180deg,rgba(18,14,9,.6) 0%,rgba(18,14,9,0) 22%)}
+.sh-paper{background:radial-gradient(ellipse at center,rgba(255,250,235,.0) 50%,rgba(70,50,25,.35) 100%)}
+/* type */
+.cz{font-family:"Cinzel";letter-spacing:.06em;font-weight:500}
+.label{font-family:"Cinzel";font-size:21px;letter-spacing:.3em;text-transform:uppercase;font-weight:600}
+.h1{font-family:"Cinzel";font-weight:500;font-size:76px;letter-spacing:.05em;line-height:1.05}
+.h2{font-family:"Cinzel";font-weight:500;font-size:54px;letter-spacing:.05em;line-height:1.1}
+.big{font-size:40px;line-height:1.3}
+.it{font-style:italic}
+.abs{position:absolute}
+.dark{color:var(--ink)}
+.gold{color:var(--goldL)}
+.qt{font-style:italic;color:var(--acc)}
+.dark .qt{color:var(--accD)}
+/* reveal: opacity + small lift only (no blur, no flicker) */
+.rv{opacity:0;transform:translate3d(0,16px,0);transition:opacity .9s var(--ease),transform 1s var(--ease)}
+.rv.on{opacity:1;transform:none}
+/* parchment card */
+.card{position:absolute;background:url("assets/img/paper.jpg") center/cover, var(--paper);color:var(--ink);
+  box-shadow:0 18px 50px rgba(0,0,0,.45);border-radius:3px}
+.card:before{content:"";position:absolute;inset:12px;border:1.5px solid rgba(140,105,45,.55);pointer-events:none}
+.card:after{content:"";position:absolute;inset:18px;border:1px solid rgba(140,105,45,.3);pointer-events:none}
+.card .lab{font-family:"Cinzel";font-size:19px;letter-spacing:.24em;text-transform:uppercase;color:var(--accD);font-weight:700}
+.glass{position:absolute;background:rgba(20,16,11,.66);border:1px solid rgba(216,185,104,.45);box-shadow:0 18px 50px rgba(0,0,0,.4)}
+.frame{position:absolute;background-size:cover;background-position:center;border:3px solid var(--goldL);outline:1px solid rgba(216,185,104,.5);outline-offset:6px;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+.rule{height:2px;background:linear-gradient(90deg,var(--gold),rgba(176,138,60,0))}
+.orn{display:inline-block;width:60px;height:2px;background:var(--gold);vertical-align:middle;margin:0 18px}
+/* journey nav */
+#nav{position:absolute;left:0;top:0;width:1920px;height:110px;z-index:45;opacity:0;transition:opacity .8s;pointer-events:none}
+#nav.on{opacity:1}
+#nav .bgnav{position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,11,7,.82),rgba(14,11,7,.45) 70%,rgba(14,11,7,0))}
+#nav.light .bgnav{background:linear-gradient(180deg,rgba(236,226,200,.0),rgba(236,226,200,0))}
+#nav svg{position:absolute;left:0;top:0}
+#steps{position:absolute;right:70px;top:30px;display:flex;gap:10px;font-family:"Cinzel";font-size:15px;letter-spacing:.16em;text-transform:uppercase}
+#steps span{padding:6px 12px;border:1px solid rgba(216,185,104,.35);color:rgba(244,236,217,.55);border-radius:2px;background:rgba(14,11,7,.45)}
+#steps span.done{color:rgba(244,236,217,.8);border-color:rgba(216,185,104,.55)}
+#steps span.cur{color:#1b150e;background:var(--acc);border-color:var(--acc);font-weight:700}
+/* cinema */
+.bar{position:absolute;left:0;right:0;height:140px;background:#0d0b08;z-index:40;transition:transform 1.1s var(--ease)}
+#barT{top:0;transform:translateY(-100%)} #barB{bottom:0;transform:translateY(100%)}
+body.cinema #barT,body.cinema #barB{transform:none}
+.screen{position:absolute;left:0;top:140px;width:1920px;height:800px;background:#000;overflow:hidden}
+.screen video,.screen .still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.screen .still{background-size:cover;background-position:center;transition:opacity .8s}
+.screen video{opacity:0;transition:opacity .6s}
+.screen.playing video{opacity:1}
+.screen.playing .still{opacity:0}
+.prompt{position:absolute;left:0;right:0;bottom:0;padding:150px 140px 54px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(10,8,5,.9) 60%);transition:opacity .7s}
+.screen.playing .prompt{opacity:0}
+.sc-head{position:absolute;left:140px;right:140px;top:46px;z-index:41;display:flex;justify-content:space-between;align-items:baseline;opacity:0;transition:opacity .8s}
+body.cinema .sc-head{opacity:1}
+.sc-head .t{font-family:"Cinzel";font-size:22px;letter-spacing:.22em;color:var(--acc)}
+.sc-head .ts{font-family:"Cinzel";font-size:16px;letter-spacing:.16em;color:#9a8f7a}
+.tl{position:absolute;left:140px;right:140px;bottom:44px;height:56px;z-index:41;opacity:0;transition:opacity .8s}
+body.cinema .tl{opacity:1}
+.tl .track{position:absolute;left:0;right:0;top:36px;height:3px;background:#3a3328}
+.tl .fill{position:absolute;left:0;top:36px;height:3px;width:0;background:var(--acc)}
+.tl .mk{position:absolute;top:26px;width:3px;height:24px;background:var(--acc)}
+.tl .mk span{position:absolute;bottom:30px;left:-10px;white-space:nowrap;font-family:"Cinzel";font-size:16px;letter-spacing:.16em;color:var(--acc)}
+.tl .mk span:before{content:"♪ "}
+.tl .mk.hit{box-shadow:0 0 16px var(--acc)}
+.tl .mk.right span{left:auto;right:-10px}
+.tl .t0,.tl .t1{position:absolute;top:44px;font-family:"Cinzel";font-size:13px;letter-spacing:.12em;color:#8a806c}
+.tl .t0{left:0;top:46px}.tl .t1{right:0;top:46px}
+.listenfor{position:absolute;right:140px;top:46px;z-index:41;font-family:"Cinzel";font-size:16px;letter-spacing:.16em;color:#bdb29a}
+/* listen */
+canvas.viz{position:absolute;left:0;top:0;width:1920px;height:1080px}
+.playdot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--acc);margin:0 6px;opacity:.25}
+.playing-ind .playdot{animation:pd 1.2s infinite ease-in-out}
+.playing-ind .playdot:nth-child(2){animation-delay:.2s}.playing-ind .playdot:nth-child(3){animation-delay:.4s}
+@keyframes pd{0%,100%{opacity:.25}50%{opacity:1}}
+/* misc */
+.orb{position:absolute;border-radius:50%;background:var(--fellowship);opacity:0;transform:scale(.4);transition:opacity .9s,transform .9s var(--ease);box-shadow:0 0 30px rgba(188,208,228,.6)}
+.orb.on{opacity:1;transform:none}
+.orb.on.dim{opacity:.16;box-shadow:none}
+.endframe{position:absolute;background:#000;border:3px solid var(--goldL);opacity:0;transform:scale(.97);transition:opacity 1s,transform 1s var(--ease);box-shadow:0 30px 80px rgba(0,0,0,.7)}
+.endframe.on{opacity:1;transform:none}
+.endframe video{width:100%;height:100%;object-fit:cover}
+#skip{position:absolute;right:60px;bottom:30px;z-index:60;font-family:"Cinzel";font-size:16px;letter-spacing:.25em;color:#9a8f7a;opacity:0;transition:opacity .4s}
+#skip.on{opacity:1}
+#black{position:absolute;inset:0;background:#000;z-index:70;opacity:0;pointer-events:none;transition:opacity 2.5s ease}
+#black.on{opacity:1}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;display:none;overflow:auto;padding:40px;color:#ddd;font-family:Georgia,serif;cursor:default}
+#ov.on{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-content:start}
+#ov div{padding:14px;border:1px solid #333;cursor:pointer;font-size:15px}
+#ov div:hover{border-color:#aaa}
+#help{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);font:14px Georgia,serif;color:#888;z-index:101;opacity:0;transition:opacity 1s;pointer-events:none}
+#help.on{opacity:1}
+html{-webkit-text-size-adjust:100%;touch-action:manipulation}body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.standalone #fsbtn{display:none}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+  <div id="slides"></div>
+  <div class="bar" id="barT"></div><div class="bar" id="barB"></div>
+  <div id="nav"><div class="bgnav"></div><svg id="navsvg" width="1920" height="110" viewBox="0 0 1920 110"></svg><div id="steps"></div></div>
+  <div id="skip">TAP AGAIN TO SKIP</div>
+  <div id="black"></div>
+</div></div>
+<div id="ov"></div>
+<div id="help">Tap: next &nbsp;·&nbsp; tap the left edge or swipe right: back</div>
+<script src="slides.js"></script>
+<script src="assets/data/viz.js"></script>
+<script src="engine.js"></script>
+<script>if(navigator.standalone||matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: fullscreen)").matches)document.body.classList.add("standalone");</script>
+</body>
+</html>
