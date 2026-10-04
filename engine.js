@@ -409,15 +409,17 @@ function drawNav(ch, k) {
     h += `<text x="${NX[i]}" y="${NY(i) + 34}" text-anchor="middle" font-family="Cinzel" font-size="${cur ? 15 : 13}" font-weight="${cur ? 700 : 500}" letter-spacing="1.5" fill="${cur ? nc : "rgba(244,236,217,.6)"}">${c.toUpperCase()}</text>`; });
   document.getElementById("navsvg").innerHTML = h;
 }
-const STEPK = { listen: 0, scene: -1, analysis: 2, compare: 4 };
+const STEPK = { listen: 0, scene: -1, analysis: 2, compare: 5 };
 function setNav(o) {
   const s = o.s, nav = document.getElementById("nav"), st = document.getElementById("steps");
   if (["hook", "title", "end"].includes(s.kind)) { nav.classList.remove("on"); return; }
   nav.classList.add("on");
   const ch = navChapter(s); drawNav(ch, s.motif);
   if (ch >= 1 && ch <= 5) {
-    let cur = s.kind === "chapter" ? -1 : STEPK[s.kind]; if (s.kind === "scene") cur = s.scene.endsWith("A") ? 1 : 3;
-    st.innerHTML = ["Listen", "Scene A", "Analysis", "Scene B", "Comparison"].map((t, i) => `<span class="${i === cur ? "cur" : i < cur ? "done" : ""}">${t}</span>`).join("");
+    let cur = s.kind === "chapter" ? -1 : STEPK[s.kind];
+    if (s.kind === "scene") cur = s.scene.endsWith("A") ? 1 : 3;
+    if (s.kind === "analysis") cur = s.scene.endsWith("A") ? 2 : 4;
+    st.innerHTML = ["Listen", "Scene A", "Analysis A", "Scene B", "Analysis B", "Comparison"].map((t, i) => `<span class="${i === cur ? "cur" : i < cur ? "done" : ""}">${t}</span>`).join("");
   } else st.innerHTML = "";
 }
 
