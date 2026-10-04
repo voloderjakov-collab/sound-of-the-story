@@ -5,6 +5,7 @@
 const D = window.DECK, M = D.motifs, SC = D.scenes, RF = D.refs, ORDER = D.order;
 const stage = document.getElementById("stage"), host = document.getElementById("slides");
 const W = 1920, H = 1080, ROMAN = ["I", "II", "III", "IV", "V"];
+function toggleFS() { const d = document.documentElement; try { if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else (d.requestFullscreen || d.webkitRequestFullscreen).call(d); } catch (_) {} }
 function fit() { const s = Math.min(innerWidth / W, innerHeight / H); stage.style.transform = `scale(${s})`; }
 addEventListener("resize", fit); fit();
 
@@ -452,7 +453,7 @@ function prev() { if (cur > 0) go(cur - 1, true); }
 addEventListener("keydown", e => {
   if (["ArrowRight", " ", "PageDown", "Enter", "ArrowDown"].includes(e.key)) { e.preventDefault(); next(); }
   else if (["ArrowLeft", "PageUp", "ArrowUp"].includes(e.key)) { e.preventDefault(); prev(); }
-  else if (e.key === "f" || e.key === "F") { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
+  else if (e.key === "f" || e.key === "F") toggleFS();
   else if (e.key === "p" || e.key === "P") openPresenter();
   else if (e.key === "o" || e.key === "O") overview();
   else if (e.key === "Escape") document.getElementById("ov").classList.remove("on");
@@ -469,13 +470,19 @@ stage.addEventListener("click", next);
     if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) { dx < 0 ? next() : prev(); return; }
     if (Math.abs(dx) < 15 && Math.abs(dy) < 15 && Date.now() - st < 600) { t.clientX < innerWidth * .15 ? prev() : next(); }
   }, { passive: false });
-  if (matchMedia("(pointer: coarse)").matches) {
+  const touch = matchMedia("(pointer: coarse)").matches;
+  const fb = el("button", "", "\u26F6 Full screen"); fb.id = "fsbtn"; fb.title = "Full screen";
+  fb.addEventListener("click", e => { e.stopPropagation(); toggleFS(); });
+  fb.addEventListener("touchend", e => e.stopPropagation());
+  document.body.appendChild(fb);
+  const sync = () => document.body.classList.toggle("isfs", !!(document.fullscreenElement || document.webkitFullscreenElement));
+  document.addEventListener("fullscreenchange", sync); document.addEventListener("webkitfullscreenchange", sync);
+  const hp = document.getElementById("help");
+  if (touch) {
     document.body.classList.add("touch");
-    const fb = el("button", "", "\u26F6"); fb.id = "fsbtn"; fb.title = "Full screen";
-    fb.addEventListener("click", e => { e.stopPropagation(); const d = document.documentElement; try { if (document.fullscreenElement) document.exitFullscreen(); else (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); } catch (_) {} });
-    document.body.appendChild(fb);
+    if (hp) hp.innerHTML = "Tap to go forward \u00B7 tap the left edge or swipe right to go back \u00B7 \u26F6 for full screen";
     const rot = el("div", "", "<div style='font-size:46px'>\u27F2</div>Turn your phone sideways<br><span>Tap to go forward \u00B7 tap the left edge to go back</span>"); rot.id = "rotate"; document.body.appendChild(rot);
-  }
+  } else if (hp) hp.innerHTML = "Click or \u2192 to go forward \u00B7 \u2190 to go back \u00B7 F for full screen";
 })();
 let mt = 0; addEventListener("mousemove", () => { document.body.classList.add("cursor"); clearTimeout(mt); mt = setTimeout(() => document.body.classList.remove("cursor"), 1800); });
 function overview() { const ov = document.getElementById("ov"); if (ov.classList.contains("on")) { ov.classList.remove("on"); return; } ov.innerHTML = ""; SL.forEach((o, i) => { const d = el("div", "", `<b>${i + 1}</b> · ${esc(o.s.title)}`); d.onclick = () => { ov.classList.remove("on"); go(i); }; ov.appendChild(d); }); ov.classList.add("on"); }
